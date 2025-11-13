@@ -241,10 +241,10 @@ if [ "$BOOT_MODE" == "UEFI" ]; then
     mkfs.vfat "$BOOT_PARTITION" 
 
 elif [ "$BOOT_MODE" == "BIOS" ]; then
-    if [[ "$DYSK" == *"nvme"* ]]; then
-        ROOT_PART="${DYSK}p1"
+    if [[ "$SELECTED_DISK" == *"nvme"* ]]; then
+        ROOT_PART="${SELECTED_DISK}p1"
     else
-        ROOT_PART="${DYSK}1"
+        ROOT_PART="${SELECTED_DISK}1"
     fi
 
     echo -e 'label: dos\nsize=+,type=Linux,bootable\n' | sfdisk "$SELECTED_DISK"
