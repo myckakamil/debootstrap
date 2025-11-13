@@ -1,5 +1,4 @@
 #!bin/bash
-# Global variables
 PUBLIC_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJF3mRlmUdCwWujN49vBX6n1Cmp1CwEtqsYZf8eUftzt km"
 
 cancel(){
@@ -36,7 +35,6 @@ dialog --title "System update" --infobox "Updating system and installing require
 apt-get update && apt-get install debootstrap parted -y
 
 debian_version(){
-    # Select Debian release
     VERSION=$(whiptail --title "Debian version" \
         --menu "Choose a Debian release to install:" 12 40 4 \
         "bookworm" "Debian 12" \
@@ -47,7 +45,6 @@ debian_version(){
 }
 
 chose_disk(){
-    # Write all physical disks to DISK_OPTIONS array
     unset DISK_OPTIONS
     declare -a DISK_OPTIONS
     while IFS= read -r line; do
@@ -56,7 +53,6 @@ chose_disk(){
         DISK_OPTIONS+=("$DISK_NAME" "($DISK_SIZE)")
     done < <(lsblk -n -d -p | grep disk)
     
-    # Select disk
     SELECTED_DISK=$(whiptail --title "Disk selection" \
         --menu "Select disk for Debian installation:" 15 60 5 \
         "${DISK_OPTIONS[@]}" \
@@ -65,7 +61,6 @@ chose_disk(){
 }
 
 chose_filesystem(){
-    # Select filesystem
     FS=$(whiptail --title "Filesystem selection" \
         --menu "Select filesystem for your partition:" 12 50 4 \
         "ext4" "Extended Filesystem 4" \
@@ -75,7 +70,6 @@ chose_filesystem(){
 }
 
 root_password(){
-    # ROOT PASSWORD
     while true; do
         while true; do
             ROOT_PASSWORD=$(whiptail --title "Root password" \
@@ -154,19 +148,15 @@ create_user(){
 }
 
 ssh_options(){
-    # SSH section
-    # Enabling SSH
     if whiptail --title "SSH" --yesno "Do you want to install and enable SSH?" 8 40; then
         SSH_ENABLE=yes
 
-        # Enabling password login for root
         if whiptail --title "SSH root login" --yesno "Do you want to allow root login with password?" 8 40; then
             SSH_ROOT_PASSWORD=yes
         else
             SSH_ROOT_PASSWORD=no
         fi
 
-        # Ask to upload my public key
         if whiptail --title "Public key" --yesno "Do you want to add the public key from the script?\n\n$PUBLIC_KEY" 12 80; then
             SSH_PUBLIC_KEY=yes
         else
@@ -178,7 +168,6 @@ ssh_options(){
 }
 
 while true; do
-    # Input hostname
     while true; do
         HOSTNAME=$(whiptail --title "Hostname" --inputbox "Enter hostname for the computer: " 8 40 3>&1 1>&2 2>&3)
         cancel $?
@@ -198,7 +187,6 @@ while true; do
     fi
     ssh_options
 
-    # Summary
     declare -a SUMMARY
     SUMMARY+="INSTALATION SUMMARY\n"
     SUMMARY+="Hostname: $HOSTNAME\n"
@@ -232,9 +220,6 @@ while true; do
 done
 
 whiptail --msgbox "Everything worked so far, installing and configuring system" 10 60
-
-#DEV 
-SELECTED_DISK="/dev/vdb"
 
 echo "=== CREATING PARTITIONS ==="
 umount "$SELECTED_DISK" 1>/dev/null
