@@ -175,7 +175,7 @@ ssh_options(){
 
 while true; do
     while true; do
-        HOSTNAME=$(whiptail --title "Hostname" --inputbox "Enter hostname for the computer: " 8 40 3>&1 1>&2 2>&3)
+        HOSTNAME=$(whiptail --title "Hostname" --inputbox "Enter hostname for the computer:" 8 40 3>&1 1>&2 2>&3)
         cancel $?
         if [ -n "$HOSTNAME" ]; then
             break
@@ -189,18 +189,19 @@ while true; do
     chose_filesystem
     create_swap
     root_password
+
     if whiptail --title "New user" --yesno "Do you want to create a new user?" 8 40; then
         create_user
     fi
+
     ssh_options
 
-    declare -a SUMMARY
-    SUMMARY+="INSTALATION SUMMARY\n"
+    SUMMARY="INSTALLATION SUMMARY\n"
     SUMMARY+="Hostname: $HOSTNAME\n"
     SUMMARY+="Debian release: $VERSION\n"
     SUMMARY+="Disk: $SELECTED_DISK\n"
-    SUMMARY+="Filesystem $FS\n"
-    SUMMARY+="Create SWAP $CREATE_SWAP_PARTITION\n\n"
+    SUMMARY+="Filesystem: $FS\n"
+    SUMMARY+="Create SWAP: $CREATE_SWAP_PARTITION\n\n"
 
     if [ -n "$USER_LOGIN" ]; then
         SUMMARY+="New User Account:\n"
@@ -222,7 +223,7 @@ while true; do
     fi
 
     if whiptail --title "Final confirmation" \
-        --yesno "This is the final step. Are you sure you want to continue instalation with this parameters?\n\n$SUMMARY" 30 80; then
+        --yesno "$(echo -e "This is the final step. Are you sure you want to continue installation with these parameters?\n\n$SUMMARY")" 30 80; then
         break
     fi
 done
@@ -250,35 +251,35 @@ if [ "$BOOT_MODE" == "UEFI" ]; then
 
 elif [ "$BOOT_MODE" == "BIOS" ]; then
     if [[ "$SELECTED_DISK" == *"nvme"* ]]; then
-        ROOT_PART="${SELECTED_DISK}p1"
+        ROOT_PARTITION="${SELECTED_DISK}p1"
     else
-        ROOT_PART="${SELECTED_DISK}1"
+        ROOT_PARTITION="${SELECTED_DISK}1"
     fi
 
     echo -e 'label: dos\nsize=+,type=Linux,bootable\n' | sfdisk "$SELECTED_DISK"
 
     case $FS in
         ext4)
-            mkfs.ext4 -F "$ROOT_PART"
+            mkfs.ext4 -F "$ROOT_PARTITION"
             echo "Mounting partitions..."
-            mount "$ROOT_PART" /mnt
+            mount "$ROOT_PARTITION" /mnt
             ;;
         btrfs)
-            mkfs.btrfs "$ROOT_PART" -f
+            mkfs.btrfs "$ROOT_PARTITION" -f
             echo "Creating subvolumes..."
-            mount "$ROOT_PART" /mnt
+            mount "$ROOT_PARTITION" /mnt
             btrfs subvolume create /mnt/@
             btrfs subvolume create /mnt/@home
             btrfs subvolume create /mnt/@var
             btrfs subvolume create /mnt/@tmp
             btrfs subvolume create /mnt/@snapshots
             echo "Mounting subvolumes..."
-            mount -o noatime,compress=zstd,subvol=@ "$ROOT_PART" /mnt
+            mount -o noatime,compress=zstd,subvol=@ "$ROOT_PARTITION" /mnt
             mkdir -p /mnt/{home,var,tmp,.snapshots}
-            mount -o noatime,compress=zstd,subvol=@home "$ROOT_PART" /mnt/home
-            mount -o noatime,compress=zstd,subvol=@var "$ROOT_PART" /mnt/var
-            mount -o noatime,compress=zstd,subvol=@tmp "$ROOT_PART" /mnt/tmp
-            mount -o noatime,compress=zstd,subvol=@snapshots "$ROOT_PART" /mnt/.snapshots
+            mount -o noatime,compress=zstd,subvol=@home "$ROOT_PARTITION" /mnt/home
+            mount -o noatime,compress=zstd,subvol=@var "$ROOT_PARTITION" /mnt/var
+            mount -o noatime,compress=zstd,subvol=@tmp "$ROOT_PARTITION" /mnt/tmp
+            mount -o noatime,compress=zstd,subvol=@snapshots "$ROOT_PARTITION" /mnt/.snapshots
             ;;
     esac
 
