@@ -69,6 +69,14 @@ chose_filesystem(){
     cancel $?
 }
 
+create_swap(){
+    if whiptail --title "Create 4GB" --yesno "Create 4GB swap partition" 8 40; then
+        CREATE_SWAP_PARTITION=yes
+    else
+        CREATE_SWAP_PARTITION=no
+    fi
+}
+
 root_password(){
     while true; do
         while true; do
@@ -112,8 +120,7 @@ create_user(){
             --inputbox "Please provide the user's full name:" 8 40 \
             3>&1 1>&2 2>&3)
         cancel $?
-        
-        # New user password
+
         while true; do
             while true; do
                 USER_PASSWORD=$(whiptail --title "User password" \
@@ -139,7 +146,6 @@ create_user(){
             fi
         done   
 
-        # New user sudo privileges
         if whiptail --title "Sudo privileges" --yesno "Do you want to give this user sudo privileges?" 8 40; then
             USER_SUDO=yes
         else
@@ -181,6 +187,7 @@ while true; do
     debian_version
     chose_disk
     chose_filesystem
+    create_swap
     root_password
     if whiptail --title "New user" --yesno "Do you want to create a new user?" 8 40; then
         create_user
@@ -192,7 +199,8 @@ while true; do
     SUMMARY+="Hostname: $HOSTNAME\n"
     SUMMARY+="Debian release: $VERSION\n"
     SUMMARY+="Disk: $SELECTED_DISK\n"
-    SUMMARY+="Filesystem $FS\n\n"
+    SUMMARY+="Filesystem $FS\n"
+    SUMMARY+="Create SWAP $CREATE_SWAP_PARTITION\n\n"
 
     if [ -n "$USER_LOGIN" ]; then
         SUMMARY+="New User Account:\n"
