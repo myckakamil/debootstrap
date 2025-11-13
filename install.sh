@@ -1,14 +1,14 @@
-#!bin/bash
+#!/bin/bash
 PUBLIC_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJF3mRlmUdCwWujN49vBX6n1Cmp1CwEtqsYZf8eUftzt km"
 
 cancel(){
-    if [ $1 -ne 0 ]; then
+    if [ "$1" -ne 0 ]; then
         clear
         exit 1
     fi
 }
 
-if [ $(id -u) -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     whiptail --title "Error" --msgbox "Please run this script as root." 8 40
     exit 1
 fi
