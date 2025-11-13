@@ -230,7 +230,6 @@ done
 
 whiptail --msgbox "Everything worked so far, installing and configuring system" 10 60
 
-echo "=== CREATING PARTITIONS ==="
 umount "$SELECTED_DISK" 1>/dev/null
 swapoff "$SELECTED_DISK" 1>/dev/null
 wipefs -af "$SELECTED_DISK"
@@ -283,12 +282,14 @@ elif [ "$BOOT_MODE" == "BIOS" ]; then
             ;;
     esac
 
-    debootstrap $VERSION /mnt
+    debootstrap "$VERSION" /mnt
 
 else
     echo "Wrong boot type"
 fi
 
-echo "=== PARTITIONS CREATED ==="
+if [[ -n "$USER_LOGIN" ]]; then
+    chroot /mnt /bin/bash -c "useradd -m -s /bin/bash -c \"$USER_NAME_FULL\" \"$USER_NAME\""
+fi
 
 clear
