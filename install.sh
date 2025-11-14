@@ -31,9 +31,6 @@ fi
 whiptail --title "Warning" --yesno "This script will erase all data on the selected disk. Do you want to continue?" --yes-button "Continue" --no-button "Exit" 8 60
 cancel $?
 
-dialog --title "System update" --infobox "Updating system and installing required packages" 8 50
-apt-get update && apt-get install debootstrap parted -y
-
 debian_version(){
     VERSION=$(whiptail --title "Debian version" \
         --menu "Choose a Debian release to install:" 12 40 4 \
@@ -230,6 +227,8 @@ done
 
 whiptail --msgbox "Everything worked so far, installing and configuring system" 10 60
 
+apt-get update && apt-get install debootstrap parted -y
+
 umount "$SELECTED_DISK" 1>/dev/null
 swapoff "$SELECTED_DISK" 1>/dev/null
 wipefs -af "$SELECTED_DISK"
@@ -288,8 +287,11 @@ else
     echo "Wrong boot type"
 fi
 
+echo "root:$ROOT_PASSWORD" | chroot /mnt chpasswd
 if [[ -n "$USER_LOGIN" ]]; then
     chroot /mnt /bin/bash -c "useradd -m -s /bin/bash -c \"$USER_NAME_FULL\" \"$USER_NAME\""
+    echo "$USER_NAME:$USER_PASSWORD" | chroot /mnt chpasswd
 fi
 
 clear
+ip -c -br a
